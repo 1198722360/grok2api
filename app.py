@@ -92,10 +92,10 @@ CONFIG = {
         "grok-3-deepsearch": "grok-3",
         "grok-3-deepersearch": "grok-3",
         "grok-3-reasoning": "grok-3",
-        'grok-4': 'grok-4',
-        'grok-4-reasoning': 'grok-4',
-        'grok-4-imageGen': 'grok-4',
-        'grok-4-deepsearch': 'grok-4'
+        'grok-4': 'grok-4-auto',
+        'grok-4-reasoning': 'grok-4-auto',
+        'grok-4-imageGen': 'grok-4-auto',
+        'grok-4-deepsearch': 'grok-4-auto'
     },
     "API": {
         "IS_TEMP_CONVERSATION": os.environ.get("IS_TEMP_CONVERSATION", "true").lower() == "true",
@@ -193,6 +193,10 @@ class AuthTokenManager:
                 "grok-3-reasoning": {
                     "RequestFrequency": 8,
                     "ExpirationTime": 24 * 60 * 60 * 1000  # 24小时
+                },
+                "grok-4-auto": {
+                    "RequestFrequency": 10,
+                    "ExpirationTime": 3 * 60 * 60 * 1000  # 3小时
                 }
             }
         self.model_config = self.model_normal_config

@@ -1,7 +1,9 @@
 version: '3.8'
 services:
   grok2api_python:
-    image: yxmiler/grok2api_python:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
     container_name: grok2api_python
     ports:
       - "3000:3000"
