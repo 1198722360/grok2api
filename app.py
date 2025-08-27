@@ -92,10 +92,12 @@ CONFIG = {
         "grok-3-deepsearch": "grok-3",
         "grok-3-deepersearch": "grok-3",
         "grok-3-reasoning": "grok-3",
-        'grok-4': 'grok-4-auto',
-        'grok-4-reasoning': 'grok-4-auto',
-        'grok-4-imageGen': 'grok-4-auto',
-        'grok-4-deepsearch': 'grok-4-auto'
+        'grok-4': 'grok-4',
+        "grok-4-search": "grok-4",
+        'grok-4-imageGen': 'grok-4',
+        'grok-4-deepsearch': 'grok-4',
+        "grok-4-deepersearch": "grok-4",
+        'grok-4-reasoning': 'grok-4',
     },
     "API": {
         "IS_TEMP_CONVERSATION": os.environ.get("IS_TEMP_CONVERSATION", "true").lower() == "true",
@@ -130,6 +132,12 @@ CONFIG = {
     "IS_SUPER_GROK": os.environ.get("IS_SUPER_GROK", "false").lower() == "true"
 }
 
+# 系统代理设置
+sys_proxy = os.environ.get("SYS_PROXY")
+if sys_proxy:
+    os.environ["http_proxy"] = sys_proxy
+    os.environ["https_proxy"] = sys_proxy
+    logger.info(f"已设置系统代理: {sys_proxy}")
 
 DEFAULT_HEADERS = {
     'Accept': '*/*',
@@ -194,7 +202,27 @@ class AuthTokenManager:
                     "RequestFrequency": 8,
                     "ExpirationTime": 24 * 60 * 60 * 1000  # 24小时
                 },
-                "grok-4-auto": {
+                "grok-4": {
+                    "RequestFrequency": 10,
+                    "ExpirationTime": 3 * 60 * 60 * 1000  # 3小时
+                },
+                "grok-4-search": {
+                    "RequestFrequency": 10,
+                    "ExpirationTime": 3 * 60 * 60 * 1000  # 3小时
+                },
+                "grok-4-imageGen": {
+                    "RequestFrequency": 10,
+                    "ExpirationTime": 3 * 60 * 60 * 1000  # 3小时
+                },
+                "grok-4-deepsearch": {
+                    "RequestFrequency": 10,
+                    "ExpirationTime": 3 * 60 * 60 * 1000  # 3小时
+                },
+                "grok-4-deepersearch": {
+                    "RequestFrequency": 10,
+                    "ExpirationTime": 3 * 60 * 60 * 1000  # 3小时
+                },
+                "grok-4-reasoning": {
                     "RequestFrequency": 10,
                     "ExpirationTime": 3 * 60 * 60 * 1000  # 3小时
                 }
@@ -901,12 +929,14 @@ def process_model_response(response, model):
     elif model == 'grok-4-reasoning':
         if response.get("isThinking") and not CONFIG["SHOW_THINKING"]:
             return result
-        if response.get("isThinking") and not CONFIG["IS_THINKING"] and response.get("messageTag") == "assistant":
+        if response.get("isThinking") and not CONFIG["IS_THINKING"] and response.get("messageTag") in ["header", "summary"]:
             result["token"] = "<think>" + response.get("token", "")
             CONFIG["IS_THINKING"] = True
         elif not response.get("isThinking") and CONFIG["IS_THINKING"] and response.get("messageTag") == "final":
             result["token"] = "</think>" + response.get("token", "")
             CONFIG["IS_THINKING"] = False
+        elif response.get("isThinking") and CONFIG["IS_THINKING"] and response.get("messageTag") in ["header", "summary"]:
+            result["token"] = response.get("token", "")
         else:
             result["token"] = response.get("token")  
     elif model in ['grok-4-deepsearch']:

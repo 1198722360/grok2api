@@ -17,4 +17,7 @@ services:
       - PORT=3000
       - SHOW_THINKING=true
       - SSO=your_sso
+      # - SYS_PROXY=http://127.0.0.1:7890
+    volumes:
+      - ./data:/data
     restart: unless-stopped
